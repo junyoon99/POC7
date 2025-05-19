@@ -29,7 +29,7 @@ public class InputManager : MonoBehaviour
         }
         else if (_instance != this)
         {
-            Destroy(gameObject);
+            Destroy(this);
         }
         input = new PlayerInput();
         input.Enable();

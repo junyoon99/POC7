@@ -1,7 +1,7 @@
 using System.Drawing;
 using UnityEngine;
 
-public class PickUpObject : MonoBehaviour
+public class CanPickUpObject : MonoBehaviour
 {
     FixedJoint2D fixedJoint2D;
     Transform parentTransform;
@@ -28,14 +28,15 @@ public class PickUpObject : MonoBehaviour
 
         parentTransform = parent;
         transform.parent = parent;
-        transform.localPosition = new Vector3(0, 1, 0);
+        transform.localPosition = new Vector3(0, 1.05f, 0);
         transform.rotation = Quaternion.identity;
     }
 
     public void FlyAway(Vector2 direction, float force) 
     {
         Escape();
+        rb2d.linearVelocityY = Mathf.Clamp(rb2d.linearVelocityY, 0, float.MaxValue);
         rb2d.AddForce(direction * force, ForceMode2D.Impulse);
-        rb2d.AddTorque(Random.Range(-1f, 1f), ForceMode2D.Impulse);
+        rb2d.AddTorque(-direction.x*force, ForceMode2D.Impulse);
     }
 }

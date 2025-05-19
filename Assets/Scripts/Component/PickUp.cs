@@ -7,9 +7,8 @@ public class PickUp : MonoBehaviour
 {
     PlayerInput playerInput;
     Collider2D col;
-    public List<ContactPoint2D> contactPoints = new List<ContactPoint2D>();
 
-    PickUpObject pickUpObject;
+    public CanPickUpObject pickUpObject;
     public float MaxThrowForce = 10f;
     public float MinThrowForce = 1f;
     public float ThrowChargeMultiplier = 1f;
@@ -23,19 +22,19 @@ public class PickUp : MonoBehaviour
         col = GetComponent<Collider2D>();
     }
 
-    void TryPickUp(InputAction.CallbackContext ctx)
+    public void TryPickUp(InputAction.CallbackContext ctx)
     {
         if (pickUpObject == null)
         {
             if (playerInput.Ingame.Direction.ReadValue<Vector2>().y >= 0) return;
 
-            contactPoints.Clear();
-            Physics2D.GetContacts(col, contactPoints);
-            foreach (ContactPoint2D point in contactPoints)
+            Collider2D[] contactColliders = Physics2D.OverlapAreaAll(col.bounds.min, col.bounds.max);
+            foreach (Collider2D point in contactColliders)
             {
-                if (point.collider.GetComponent<PickUpObject>())
+                if (point.GetComponent<CanPickUpObject>())
                 {
-                    pickUpObject = point.collider.GetComponent<PickUpObject>();
+                    pickUpObject = point.GetComponent<CanPickUpObject>();
+                    pickUpObject.GetComponent<HitBulletTime>().HitObjects.Clear();
                     pickUpObject.Join(transform);
                     return;
                 }
@@ -61,6 +60,7 @@ public class PickUp : MonoBehaviour
     void ThrowObject()
     {
         Vector2 inputDirection = playerInput.Ingame.Direction.ReadValue<Vector2>();
+        Vector2 mouseDirection = Camera.main.ScreenToWorldPoint(Input.mousePosition).normalized;
         if (inputDirection != Vector2.zero)
         {
             pickUpObject.FlyAway(inputDirection, Mathf.Clamp(ThrowForce, MinThrowForce, MaxThrowForce));
